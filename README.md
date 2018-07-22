@@ -27,7 +27,7 @@ Edit your applications [AppConfig]() and import the `connect_pusher_views` metho
 
 ```python
 from django.apps import AppConfig
-from drf_model_pusher.handlers import connect_pusher_views
+from drf_model_pusher.receivers import connect_pusher_views
 
 class MyAppConfig(AppConfig):
     def ready(self):
