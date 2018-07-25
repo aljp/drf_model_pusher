@@ -15,17 +15,18 @@ class PusherBackendMetaclass(type):
     """
 
     def __new__(mcs, cls, bases, dicts):
-        if dicts.get('Meta') and hasattr(dicts.get('Meta'), 'abstract'):
-            dicts['__metaclass__'] = mcs
+        if dicts.get("Meta") and hasattr(dicts.get("Meta"), "abstract"):
+            dicts["__metaclass__"] = mcs
             return super().__new__(mcs, cls, bases, dicts)
 
-        assert dicts.get('serializer_class', None) is not None, \
-               'PusherBackends require a serializer_class'
-        dicts['__metaclass__'] = mcs
+        assert (
+            dicts.get("serializer_class", None) is not None
+        ), "PusherBackends require a serializer_class"
+        dicts["__metaclass__"] = mcs
 
         final_cls = super().__new__(mcs, cls, bases, dicts)
 
-        model_name = dicts['serializer_class'].Meta.model.__name__.lower()
+        model_name = dicts["serializer_class"].Meta.model.__name__.lower()
         pusher_backend_registry[model_name].append(final_cls)
         return final_cls
 

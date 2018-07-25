@@ -13,9 +13,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = "drf_model_pusher"
-DESCRIPTION = (
-    "Easy to use class mixins for Django Rest Framework and Pusher to keep your API realtime."
-)
+DESCRIPTION = "Easy to use class mixins for Django Rest Framework and Pusher to keep your API realtime."
 URL = "https://github.com/aljp/drf_model_pusher"
 EMAIL = "aljparr0@gmail.com"
 AUTHOR = "Adam Jacquier-Parr"
@@ -23,11 +21,7 @@ REQUIRES_PYTHON = ">=3.6.0"
 VERSION = "0.1.0"
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    "django",
-    "djangorestframework",
-    "pusher"
-]
+REQUIRED = ["django", "djangorestframework", "pusher"]
 
 # What packages are optional?
 EXTRAS = {
