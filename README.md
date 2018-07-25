@@ -93,6 +93,10 @@ class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
         return "<channel_id>"
 ```
 
+## Common Issues
+### Unregistered Backends
+If you have followed the above steps correctly and your backends are not registering, your app config may not be running it's `ready` method. To force this, in your apps `__init__.py` add the line `default_app_config = 'myapp.apps.MyAppConfig'`
+
 ## Contributions
 
 It's early days, but if you'd like to report any issues or work on an improvement then please check for any similar existing issues before you report them.
