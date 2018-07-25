@@ -10,6 +10,7 @@ def send_pusher_event(
     event_name,
     data,
     socket_id=None,
+    **kwargs,
 ):
     """
     Send a pusher event from a signal
