@@ -89,7 +89,7 @@ from drf_model_pusher.views import ModelPusherViewMixin
 class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
     serializer_class = MyModelSerializer
     
-    def get_channel_id(self):
+    def get_pusher_channel(self):
         return "<channel_id>"
 ```
 
