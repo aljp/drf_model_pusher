@@ -1,5 +1,6 @@
 language: python
 python:
+    - "3.5"
     - "3.6"
 
 env:
@@ -16,8 +17,5 @@ install:
 - pip install black==18.6b1
 
 script:
-- coverage run manage.py test
 - black --check .
-
-after_success:
-- coverage report
+- python run manage.py test
