@@ -1,4 +1,5 @@
 from drf_model_pusher.backends import get_models_pusher_backends
+from drf_model_pusher.exceptions import ModelPusherException
 from drf_model_pusher.signals import view_post_save
 
 
@@ -19,7 +20,8 @@ class ModelPusherViewMixin(object):
         self.pusher_backends = self.get_models_pusher_backends()
 
     def get_models_pusher_backends(self):
-        assert hasattr(self, "queryset"), "View must have a queryset defined"
+        if not hasattr(self, "queryset"):
+            raise ModelPusherException("View must have a queryset defined")
         return get_models_pusher_backends(self.queryset.model)
 
     def get_pusher_channel(self):
