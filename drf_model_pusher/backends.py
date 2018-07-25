@@ -19,10 +19,8 @@ class PusherBackendMetaclass(type):
             dicts['__metaclass__'] = mcs
             return super().__new__(mcs, cls, bases, dicts)
 
-        assert (
-            dicts.get('serializer_class', None) is not None,
-            'PusherBackends require a serializer_class'
-        )
+        assert dicts.get('serializer_class', None) is not None, \
+               'PusherBackends require a serializer_class'
         dicts['__metaclass__'] = mcs
 
         final_cls = super().__new__(mcs, cls, bases, dicts)
