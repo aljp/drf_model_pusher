@@ -27,7 +27,7 @@ Edit your applications [AppConfig]() and import the `connect_pusher_views` metho
 
 ```python
 from django.apps import AppConfig
-from drf_model_pusher.receivers import connect_pusher_views
+from drf_model_pusher.config import connect_pusher_views
 
 class MyAppConfig(AppConfig):
     def ready(self):
@@ -68,7 +68,7 @@ Then import your pusher backends in your AppConfig to register them.
 
 ```python
 from django.apps import AppConfig
-from drf_model_pusher.handlers import connect_pusher_views
+from drf_model_pusher.config import connect_pusher_views
 
 class MyAppConfig(AppConfig):
     def ready(self):
@@ -80,18 +80,22 @@ class MyAppConfig(AppConfig):
 
 ### Implement Views
 
-Add the [PushModelChanges]() mixin class to your views.
+Add the [ModelPusherViewMixin]() mixin class to your views.
 
 ```python
 from rest_framework.viewsets import ModelViewSet
-from drf_model_pusher.views import PushModelChanges
+from drf_model_pusher.views import ModelPusherViewMixin
 
-class MyModelViewSet(PushModelChanges, ModelViewSet):
+class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
     serializer_class = MyModelSerializer
     
     def get_channel_id(self):
         return "<channel_id>"
 ```
+
+## Common Issues
+### Unregistered Backends
+If you have followed the above steps correctly and your backends are not registering, your app config may not be running it's `ready` method. To force this, in your apps `__init__.py` add the line `default_app_config = 'myapp.apps.MyAppConfig'`
 
 ## Contributions
 
