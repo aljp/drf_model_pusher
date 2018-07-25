@@ -18,7 +18,7 @@ In your settings set your Pusher App Id and credentials, the cluster is optional
 PUSHER_APP_ID=""  
 PUSHER_KEY=""  
 PUSHER_SECRET=""
-PUSHER_CLUSTER_ID=""  
+PUSHER_CLUSTER=""  
 ```
 
 ### Application Config
