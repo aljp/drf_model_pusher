@@ -1,3 +1,5 @@
+![PyPI Version Badge](https://img.shields.io/badge/PyPI-0.1.1-green.svg)
+
 # DRF Model Pusher
 
 Easy to use class mixins for [Django Rest Framework]() and [Pusher]() to keep your API realtime.
