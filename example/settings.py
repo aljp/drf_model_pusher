@@ -5,7 +5,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
-    "example.ExampleApp",
+    "example",
     "drf_model_pusher",
 ]
 
