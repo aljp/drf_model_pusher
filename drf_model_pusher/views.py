@@ -22,14 +22,19 @@ class ModelPusherViewMixin(object):
         self.pusher_backends = self.get_models_pusher_backends()
 
     def get_models_pusher_backends(self):
-        if not hasattr(self, "queryset"):
-            raise ModelPusherException("View must have a queryset defined")
-        return get_models_pusher_backends(self.queryset.model)
+        if hasattr(self, "queryset"):
+            model = self.queryset.model
+        elif hasattr(self, "get_queryset"):
+            model = self.get_queryset().model
+        else:
+            raise ModelPusherException("View must have a queryset attribute or get_queryset method defined")
+        return get_models_pusher_backends(model)
 
     def get_pusher_channel(self):
         """Return the channel from the view"""
         raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the `get_pusher_channel` method to use the PushChangesMixin"
+            "{0} must implement the `get_pusher_channel` method to use the PushChangesMixin".format(
+                self.__class__.__name__)
         )
 
     def get_pusher_backends(self):

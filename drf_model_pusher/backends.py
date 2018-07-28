@@ -71,7 +71,8 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
     def get_event_name(self, event_type):
         """Return the model name and the event_type separated by a dot"""
         serializer_class = self.get_serializer_class()
-        return f"{serializer_class.Meta.model.__name__.lower()}.{event_type}"
+        model_class_name = serializer_class.Meta.model.__name__.lower()
+        return "{0}.{1}".format(model_class_name, event_type)
 
     def get_serializer_class(self):
         """Return the views serializer class"""
@@ -106,7 +107,7 @@ class PrivatePusherBackend(PusherBackend):
     def get_channel(self, instance=None):
         """Return the channel prefixed with `private-`"""
         channel = super().get_channel(instance=instance)
-        return f"private-{channel}"
+        return "private-{channel}".format(channel=channel)
 
 
 def get_models_pusher_backends(model):
