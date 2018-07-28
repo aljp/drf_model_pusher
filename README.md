@@ -1,4 +1,5 @@
-![PyPI Version Badge](https://img.shields.io/badge/PyPI-0.1.1-green.svg)
+[![PyPI version](https://badge.fury.io/py/drf-model-pusher.svg)](https://badge.fury.io/py/drf-model-pusher)
+[![Build Status](https://travis-ci.org/aljp/drf_model_pusher.svg?branch=master)](https://travis-ci.org/aljp/drf_model_pusher)
 
 # DRF Model Pusher
 

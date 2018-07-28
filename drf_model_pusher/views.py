@@ -8,11 +8,13 @@ class ModelPusherViewMixin(object):
 
     pusher_backends = []
 
-    PUSH_CREATE = 'create'
-    PUSH_UPDATE = 'update'
-    PUSH_DELETE = 'delete'
+    PUSH_CREATE = "create"
+    PUSH_UPDATE = "update"
+    PUSH_DELETE = "delete"
 
-    def __init__(self, push_creations=True, push_updates=True, push_deletions=True, **kwargs):
+    def __init__(
+        self, push_creations=True, push_updates=True, push_deletions=True, **kwargs
+    ):
         self.push_creations = push_creations
         self.push_updates = push_updates
         self.push_deletions = push_deletions
@@ -69,5 +71,5 @@ class ModelPusherViewMixin(object):
             sender=self.__class__,
             channel=channel,
             event_name=event_name,
-            data=data
+            data=data,
         )

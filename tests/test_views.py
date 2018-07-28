@@ -17,9 +17,7 @@ class TestModelPusherViewMixin(TestCase):
     def test_creations_are_pushed(self, trigger: Mock):
 
         request_factory = APIRequestFactory()
-        create_request = request_factory.post(path="/mymodels/", data={
-            "name": "Henry"
-        })
+        create_request = request_factory.post(path="/mymodels/", data={"name": "Henry"})
 
         view = MyModelViewSet.as_view({"post": "create"})
         response = view(create_request)
@@ -28,9 +26,7 @@ class TestModelPusherViewMixin(TestCase):
         self.assertEqual(response.status_code, 201, response.data)
 
         trigger.assert_called_once_with(
-            ["channel"],
-            "mymodel.create",
-            MyModelSerializer(instance=instance).data,
+            ["channel"], "mymodel.create", MyModelSerializer(instance=instance).data
         )
 
     @mock.patch("pusher.Pusher.trigger")
@@ -38,9 +34,9 @@ class TestModelPusherViewMixin(TestCase):
         instance = MyModel.objects.create(name="Julie")
 
         request_factory = APIRequestFactory()
-        partial_update_request = request_factory.patch(path="/mymodels/123/", data={
-            "name": "Michelle"
-        })
+        partial_update_request = request_factory.patch(
+            path="/mymodels/123/", data={"name": "Michelle"}
+        )
 
         view = MyModelViewSet.as_view({"patch": "partial_update"})
         response = view(partial_update_request, pk=instance.pk)
@@ -50,9 +46,7 @@ class TestModelPusherViewMixin(TestCase):
         self.assertEqual(instance.name, "Michelle")
 
         trigger.assert_called_once_with(
-            ["channel"],
-            "mymodel.update",
-            MyModelSerializer(instance=instance).data,
+            ["channel"], "mymodel.update", MyModelSerializer(instance=instance).data
         )
 
     @mock.patch("pusher.Pusher.trigger")
@@ -70,7 +64,5 @@ class TestModelPusherViewMixin(TestCase):
             instance = MyModel.objects.get(pk=instance.pk)
 
         trigger.assert_called_once_with(
-            ["channel"],
-            "mymodel.delete",
-            MyModelSerializer(instance=instance).data,
+            ["channel"], "mymodel.delete", MyModelSerializer(instance=instance).data
         )

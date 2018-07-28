@@ -1,0 +1,18 @@
+language: python
+python:
+    - "3.6"
+
+env:
+    - DJANGO_VERSION=1.10
+    - DJANGO_VERSION=1.11
+    - DJANGO_VERSION=2.0
+
+install:
+- pip install -r requirements.txt
+- yes | pip uninstall Django
+- pip install Django==$DJANGO_VERSION
+- pip install black==18.6b1
+
+script:
+- black --check .
+- python manage.py test
