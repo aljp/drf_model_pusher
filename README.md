@@ -100,6 +100,11 @@ class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
 ### Unregistered Backends
 If you have followed the above steps correctly and your backends are not registering, your app config may not be running it's `ready` method. To force this, in your apps `__init__.py` add the line `default_app_config = 'myapp.apps.MyAppConfig'`
 
+### Pusher
+Be aware of any pusher limits and consult their documentation at [https://pusher.com/docs](https://pusher.com/docs) for some common questions.  
+
+[Pusher has a 10kb default size limit on messages, this can be increased to 256kb by contacting support.](https://support.pusher.com/hc/en-us/articles/202046553-What-is-the-message-size-limit-when-publishing-a-message-)
+
 ## Contributions
 
 It's early days, but if you'd like to report any issues or work on an improvement then please check for any similar existing issues before you report them.
