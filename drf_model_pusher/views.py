@@ -56,7 +56,6 @@ class ModelPusherViewMixin(object):
         """Create the object and then send the pusher event"""
         super().perform_create(serializer)
         if self.push_creations:
-            print(self.get_pusher_backends())
             self.push_changes(self.PUSH_CREATE, serializer.instance)
 
     def perform_destroy(self, instance):
