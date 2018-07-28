@@ -6,6 +6,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "example.ExampleApp",
+    "drf_model_pusher",
 ]
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "example"}}
