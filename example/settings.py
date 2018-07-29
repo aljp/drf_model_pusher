@@ -5,7 +5,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
-    "example.ExampleApp",
+    "example",
+    "drf_model_pusher",
 ]
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "example"}}

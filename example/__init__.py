@@ -1,1 +1,1 @@
-from example.app import ExampleApp
+default_app_config = "example.apps.ExampleConfig"
