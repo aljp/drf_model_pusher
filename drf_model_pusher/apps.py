@@ -17,7 +17,9 @@ class DrfModelPusherConfig(AppConfig):
         if hasattr(settings, "DRF_MODEL_PUSHER_BACKENDS_FILE"):
             pusher_backends_file = settings.DRF_MODEL_PUSHER_BACKENDS_FILE
 
-        for app_config in self.apps.get_app_configs():
+        from django.apps import apps
+
+        for app_config in apps.get_app_configs():
             if os.path.exists(os.path.join(app_config.path, pusher_backends_file)):
                 import_module("{0}.pusher_backends".format(app_config.name))
 
