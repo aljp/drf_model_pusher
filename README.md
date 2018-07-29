@@ -87,7 +87,7 @@ class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
 
 If you want to ignore the current connection when sending messages you should set a `x-pusher-socket-id` header on your requests.  This may be useful if you're modifying resources and receiving the results in a response, you may not want the current connection to listen on these events to prevent duplicating content.
 
-The PusherBackend.push_change method accepts an `ignore` keyword argument which can toggle whether the pusher socket id is used, it defaults to `True`, so including the pusher socket id in the request will ignore the current connection for all pusher events sent by default.
+The PusherBackend.push_change method accepts an `ignore` boolean keyword argument which can toggle whether the pusher socket id is used, it defaults to `True`, so including the pusher socket id in the request will ignore the current connection for all pusher events sent by default.
 
 ### Settings
 
