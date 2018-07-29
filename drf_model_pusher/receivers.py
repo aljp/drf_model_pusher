@@ -3,7 +3,7 @@ from pusher import Pusher
 
 
 def send_pusher_event(
-    signal, sender, instance, channel, event_name, data, socket_id=None, **kwargs
+    signal, sender, instance, channels, event_name, data, socket_id=None, **kwargs
 ):
     """
     Send a pusher event from a signal
@@ -19,4 +19,4 @@ def send_pusher_event(
         secret=settings.PUSHER_SECRET,
         cluster=pusher_cluster,
     )
-    pusher.trigger([channel], event_name, data)
+    pusher.trigger(channels, event_name, data)

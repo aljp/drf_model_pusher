@@ -48,12 +48,12 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return pusher_socket
 
     def push_change(self, event, instance=None, pre_destroy=False, ignore=False):
-        channel, event_name, data = self.get_packet(event, instance)
+        channels, event_name, data = self.get_packet(event, instance)
         if pre_destroy:
             view_pre_destroy.send(
                 sender=self.__class__,
                 instance=self,
-                channel=channel,
+                channels=channels,
                 event_name=event_name,
                 data=data,
                 socket_id=self.pusher_socket_id if ignore else None,
@@ -62,7 +62,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
             view_post_save.send(
                 sender=self.__class__,
                 instance=self,
-                channel=channel,
+                channels=channels,
                 event_name=event_name,
                 data=data,
                 socket_id=self.pusher_socket_id if ignore else None,
@@ -84,17 +84,17 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         kwargs["context"] = view.get_serializer_context()
         return serializer_class(*args, **kwargs)
 
-    def get_channel(self, instance=None):
+    def get_channels(self, instance=None):
         """Return the channel from the view or instance"""
-        channel = self.view.get_pusher_channel()
-        return channel
+        channels = self.view.get_pusher_channels()
+        return channels
 
     def get_packet(self, event, instance):
         """Return a tuple consisting of the channel, event name, and the JSON serializable data."""
-        channel = self.get_channel(instance=instance)
+        channels = self.get_channels(instance=instance)
         event_name = self.get_event_name(event)
         data = self.get_serializer(self.view, instance=instance).data
-        return channel, event_name, data
+        return channels, event_name, data
 
 
 class PrivatePusherBackend(PusherBackend):
