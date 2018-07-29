@@ -67,20 +67,27 @@ class MyModelPrivatePusherBackend(PrivatePusherBackend):
 
 ### Implement Views
 
-Add the [ModelPusherViewMixin]() mixin class to your views.
+Add the [ModelPusherViewMixin]() mixin class to your views and define a `get_pusher_channels` method which should return a list of strings to use as channels.
 
 ```python
 # example/views.py
 
 from rest_framework.viewsets import ModelViewSet
 from drf_model_pusher.views import ModelPusherViewMixin
+from example.serializers import MyModelSerializer
 
 class MyModelViewSet(ModelPusherViewMixin, ModelViewSet):
     serializer_class = MyModelSerializer
     
-    def get_pusher_channel(self):
-        return "<channel_id>"
+    def get_pusher_channels(self):
+        return ["<channel_id>"]
 ```
+
+### Ignoring the current connection
+
+If you want to ignore the current connection when sending messages you should set a `x-pusher-socket-id` header on your requests.  This may be useful if you're modifying resources and receiving the results in a response, you may not want the current connection to listen on these events to prevent duplicating content.
+
+The PusherBackend.push_change method accepts an `ignore` keyword argument which can toggle whether the pusher socket id is used, it defaults to `True`, so including the pusher socket id in the request will ignore the current connection for all pusher events sent by default.
 
 ### Settings
 

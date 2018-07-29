@@ -47,7 +47,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         pusher_socket = view.request.META.get("HTTP_X_PUSHER_SOCKET_ID", None)
         return pusher_socket
 
-    def push_change(self, event, instance=None, pre_destroy=False, ignore=False):
+    def push_change(self, event, instance=None, pre_destroy=False, ignore=True):
         channels, event_name, data = self.get_packet(event, instance)
         if pre_destroy:
             view_pre_destroy.send(
