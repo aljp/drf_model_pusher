@@ -1,5 +1,6 @@
 from django.conf import settings
-from pusher import Pusher
+
+from drf_model_pusher.proxies import PusherProxy
 
 
 def send_pusher_event(
@@ -13,7 +14,7 @@ def send_pusher_event(
     except AttributeError:
         pusher_cluster = "mt1"
 
-    pusher = Pusher(
+    pusher = PusherProxy(
         app_id=settings.PUSHER_APP_ID,
         key=settings.PUSHER_KEY,
         secret=settings.PUSHER_SECRET,
