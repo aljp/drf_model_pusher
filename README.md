@@ -102,6 +102,22 @@ Be aware of any pusher limits and consult their documentation at [https://pusher
 
 [Pusher has a 10kb default size limit on messages, this can be increased to 256kb by contacting support.](https://support.pusher.com/hc/en-us/articles/202046553-What-is-the-message-size-limit-when-publishing-a-message-)
 
+### Extending `PusherBackend`
+If you want to extend `PusherBackend` or `PrivatePusherBackend` rather than declaring a new concrete backend, you need to make sure the class is abstract. For example your new base class would be similar to this:
+
+```python
+class MyPusherBackend(PusherBackend):
+    class Meta:
+        abstract = True
+
+    # Override whatever methods here
+
+
+class MyModelBackend(MyPusherBackend):
+    class Meta:
+        model = MyModel
+```
+
 ## Contributions
 
 It's early days, but if you'd like to report any issues or work on an improvement then please check for any similar existing issues before you report them.
