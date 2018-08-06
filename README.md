@@ -91,7 +91,8 @@ The PusherBackend.push_change method accepts an `ignore` boolean keyword argumen
 
 ### Settings
 
-- `DRF_MODEL_PUSHER_BACKENDS_FILE` - The file in your applications to import PusherBackends.
+- `DRF_MODEL_PUSHER_BACKENDS_FILE` (default: `pusher_backends.py`) - The file in your applications to import PusherBackends.
+- `DRF_MODEL_PUSHER_DISABLED` (default: `False`) - Determines whether or not to trigger Pusher events.
 
 ## Common Issues
 ### Unregistered Backends
