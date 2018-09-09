@@ -33,7 +33,7 @@ Modules
 .. automodule:: drf_model_pusher.backends
    :members:
 
-.. automodule:: drf_model_pusher.proxies
+.. automodule:: drf_model_pusher.providers
    :members:
 
 .. automodule:: drf_model_pusher.receivers
