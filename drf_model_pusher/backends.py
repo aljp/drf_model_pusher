@@ -1,5 +1,5 @@
 """
-Mixin Classes for Pusher integration with Views
+PusherBackend classes define how changes from a Model are serialized, and then which provider will send the message.
 """
 from collections import defaultdict
 

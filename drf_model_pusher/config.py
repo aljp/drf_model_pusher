@@ -1,3 +1,4 @@
+"""Methods for configuration drf_model_pusher"""
 from drf_model_pusher.receivers import send_pusher_event
 from drf_model_pusher.signals import view_post_save, view_pre_destroy
 

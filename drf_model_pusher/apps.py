@@ -1,3 +1,4 @@
+"""AppConfig for drf_model_pusher"""
 import os
 from importlib import import_module
 

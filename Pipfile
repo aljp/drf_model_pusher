@@ -12,6 +12,7 @@ pusher = "*"
 pytest = "*"
 pytest-django = "*"
 tox = "*"
+sphinx = "*"
 
 [requires]
 python_version = "3.6"
