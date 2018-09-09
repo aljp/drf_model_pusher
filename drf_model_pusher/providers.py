@@ -1,4 +1,3 @@
-from typing import Dict, List, Optional
 
 from django.conf import settings
 from pusher import Pusher
@@ -10,8 +9,8 @@ class PusherProvider(object):
     """
 
     def __init__(self):
-        self._pusher: Optional[Pusher] = None
-        self._disabled: bool = False
+        self._pusher = None
+        self._disabled = False
 
         if hasattr(settings, "DRF_MODEL_PUSHER_DISABLED"):
             self._disabled = settings.DRF_MODEL_PUSHER_DISABLED
@@ -29,9 +28,7 @@ class PusherProvider(object):
             cluster=pusher_cluster,
         )
 
-    def trigger(
-        self, channels: List[str], event_name: str, data: Dict, socket_id: None
-    ):
+    def trigger(self, channels, event_name, data, socket_id=None):
         if self._disabled:
             return
 
@@ -45,5 +42,5 @@ class AblyProvider(object):
     def configure(self):
         pass
 
-    def trigger(self, channels: List[str], event_name: str, data: Dict):
+    def trigger(self, channels, event_name, data):
         pass

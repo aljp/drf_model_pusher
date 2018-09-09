@@ -1,17 +1,15 @@
 """The receiver methods attach to callbacks to signals"""
-from typing import Any, Optional, Dict, List
-
 from drf_model_pusher.providers import PusherProvider
 
 
 def send_pusher_event(
-    signal: Any,
-    sender: Any,
-    instance: Any,
-    channels: List[str],
-    event_name: str,
-    data: Dict,
-    socket_id: Optional[str] = None,
+    signal,
+    sender,
+    instance,
+    channels,
+    event_name,
+    data,
+    socket_id=None,
     **kwargs
 ):
     """
