@@ -10,7 +10,7 @@ class PusherProvider(object):
 
     def __init__(self):
         self._pusher = None
-        self._disabled: bool = False
+        self._disabled = False
 
         if hasattr(settings, "DRF_MODEL_PUSHER_DISABLED"):
             self._disabled = settings.DRF_MODEL_PUSHER_DISABLED
@@ -28,9 +28,7 @@ class PusherProvider(object):
             cluster=pusher_cluster,
         )
 
-    def trigger(
-        self, channels, event_name, data, socket_id: None
-    ):
+    def trigger(self, channels, event_name, data, socket_id=None):
         if self._disabled:
             return
 
