@@ -4,7 +4,7 @@ Mixin Classes for Pusher integration with Views
 from collections import defaultdict
 from typing import List, Dict
 
-from drf_model_pusher.proxies import PusherProvider
+from drf_model_pusher.providers import PusherProvider
 from drf_model_pusher.signals import view_pre_destroy, view_post_save
 
 pusher_backend_registry = defaultdict(list)
