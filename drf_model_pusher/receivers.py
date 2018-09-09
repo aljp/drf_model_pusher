@@ -1,7 +1,7 @@
 """The receiver methods attach to callbacks to signals"""
 from typing import Any, Optional, Dict, List
 
-from drf_model_pusher.proxies import PusherProvider
+from drf_model_pusher.providers import PusherProvider
 
 
 def send_pusher_event(
