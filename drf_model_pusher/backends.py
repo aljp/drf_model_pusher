@@ -2,7 +2,6 @@
 Mixin Classes for Pusher integration with Views
 """
 from collections import defaultdict
-from typing import List, Dict
 
 from drf_model_pusher.providers import PusherProvider
 from drf_model_pusher.signals import view_pre_destroy, view_post_save
@@ -36,7 +35,7 @@ class PusherBackendMetaclass(type):
 class PacketAdapter(object):
     """Adapt data from the (event, channels, data) to a potentially different format."""
 
-    def parse_packet(self, channels: List[str], event_name: str, data: Dict):
+    def parse_packet(self, channels, event_name, data):
         return channels, event_name, data
 
 

@@ -1,5 +1,3 @@
-from typing import List
-
 from drf_model_pusher.backends import get_models_pusher_backends
 from drf_model_pusher.exceptions import ModelPusherException
 from drf_model_pusher.signals import view_post_save
@@ -34,7 +32,7 @@ class ModelPusherViewMixin(object):
             )
         return get_models_pusher_backends(model)
 
-    def get_pusher_channels(self) -> List[str]:
+    def get_pusher_channels(self):
         """Return the channel from the view"""
         raise NotImplementedError(
             "{0} must implement the `get_pusher_channels` method".format(
