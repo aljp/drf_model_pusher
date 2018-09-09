@@ -4,6 +4,7 @@ Mixin Classes for Pusher integration with Views
 from collections import defaultdict
 from typing import List, Dict
 
+from drf_model_pusher.proxies import PusherProvider
 from drf_model_pusher.signals import view_pre_destroy, view_post_save
 
 pusher_backend_registry = defaultdict(list)
@@ -48,6 +49,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         abstract = True
 
     packet_adapter_class = PacketAdapter
+    provider_class = PusherProvider
 
     def __init__(self, view):
         self.view = view
@@ -70,6 +72,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
                 event_name=event_name,
                 data=data,
                 socket_id=self.pusher_socket_id if ignore else None,
+                provider_class=self.provider_class,
             )
         else:
             view_post_save.send(
@@ -79,7 +82,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
                 event_name=event_name,
                 data=data,
                 socket_id=self.pusher_socket_id if ignore else None,
-                provider_class="Pusher"
+                provider_class=self.provider_class,
             )
 
     def get_event_name(self, event_type):
@@ -109,7 +112,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         event_name = self.get_event_name(event)
         data = self.get_serializer(self.view, instance=instance).data
         channels, event_name, data = self.packet_adapter.parse_packet(channels, event_name, data)
-        return channels, event, data
+        return channels, event_name, data
 
 
 class PrivatePusherBackend(PusherBackend):

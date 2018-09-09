@@ -26,7 +26,7 @@ class TestModelPusherViewMixin(TestCase):
         self.assertEqual(response.status_code, 201, response.data)
 
         trigger.assert_called_once_with(
-            ["channel"], "mymodel.create", MyModelSerializer(instance=instance).data
+            ["channel"], "mymodel.create", MyModelSerializer(instance=instance).data, None
         )
 
     @mock.patch("pusher.Pusher.trigger")
@@ -46,7 +46,7 @@ class TestModelPusherViewMixin(TestCase):
         self.assertEqual(instance.name, "Michelle")
 
         trigger.assert_called_once_with(
-            ["channel"], "mymodel.update", MyModelSerializer(instance=instance).data
+            ["channel"], "mymodel.update", MyModelSerializer(instance=instance).data, None
         )
 
     @mock.patch("pusher.Pusher.trigger")
@@ -64,5 +64,5 @@ class TestModelPusherViewMixin(TestCase):
             instance = MyModel.objects.get(pk=instance.pk)
 
         trigger.assert_called_once_with(
-            ["channel"], "mymodel.delete", MyModelSerializer(instance=instance).data
+            ["channel"], "mymodel.delete", MyModelSerializer(instance=instance).data, None
         )
