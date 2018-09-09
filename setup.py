@@ -18,7 +18,7 @@ URL = "https://github.com/aljp/drf_model_pusher"
 EMAIL = "aljparr0@gmail.com"
 AUTHOR = "Adam Jacquier-Parr"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["django", "djangorestframework", "pusher"]
