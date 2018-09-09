@@ -1,23 +1,24 @@
-from django.conf import settings
+"""The receiver methods attach to callbacks to signals"""
+from typing import Any, Optional, Dict, List
 
-from drf_model_pusher.proxies import PusherProxy
+from drf_model_pusher.proxies import PusherProvider
 
 
 def send_pusher_event(
-    signal, sender, instance, channels, event_name, data, socket_id=None, **kwargs
+    signal: Any,
+    sender: Any,
+    instance: Any,
+    channels: List[str],
+    event_name: str,
+    data: Dict,
+    socket_id: Optional[str] = None,
+    **kwargs
 ):
     """
-    Send a pusher event from a signal
+    Sends an update using the provided provider class
     """
-    try:
-        pusher_cluster = settings.PUSHER_CLUSTER
-    except AttributeError:
-        pusher_cluster = "mt1"
 
-    pusher = PusherProxy(
-        app_id=settings.PUSHER_APP_ID,
-        key=settings.PUSHER_KEY,
-        secret=settings.PUSHER_SECRET,
-        cluster=pusher_cluster,
-    )
-    pusher.trigger(channels, event_name, data)
+    push_provider_class = kwargs.get("provider_class", PusherProvider)
+    push_provider = push_provider_class()
+    push_provider.configure()
+    push_provider.trigger(channels, event_name, data, socket_id)

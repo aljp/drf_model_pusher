@@ -2,6 +2,7 @@
 Mixin Classes for Pusher integration with Views
 """
 from collections import defaultdict
+from typing import List, Dict
 
 from drf_model_pusher.signals import view_pre_destroy, view_post_save
 
@@ -11,7 +12,7 @@ pusher_backend_registry = defaultdict(list)
 class PusherBackendMetaclass(type):
     """
     Register PusherBackend's with a registry for model lookups, supports
-    abstract classes
+    "abstract" classes which are not registered but can extend functionality.
     """
 
     def __new__(mcs, cls, bases, dicts):
@@ -31,6 +32,13 @@ class PusherBackendMetaclass(type):
         return final_cls
 
 
+class PacketAdapter(object):
+    """Adapt data from the (event, channels, data) to a potentially different format."""
+
+    def parse_packet(self, channels: List[str], event_name: str, data: Dict):
+        return channels, event_name, data
+
+
 class PusherBackend(metaclass=PusherBackendMetaclass):
     """
     PusherBackend is the base class for implementing serializers with Pusher
@@ -39,15 +47,20 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
     class Meta:
         abstract = True
 
+    packet_adapter_class = PacketAdapter
+
     def __init__(self, view):
         self.view = view
         self.pusher_socket_id = self.get_pusher_socket(view)
+        self.packet_adapter = PacketAdapter()
 
     def get_pusher_socket(self, view):
+        """Return the socket from the request header."""
         pusher_socket = view.request.META.get("HTTP_X_PUSHER_SOCKET_ID", None)
         return pusher_socket
 
     def push_change(self, event, instance=None, pre_destroy=False, ignore=True):
+        """Send a signal to push the update"""
         channels, event_name, data = self.get_packet(event, instance)
         if pre_destroy:
             view_pre_destroy.send(
@@ -66,6 +79,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
                 event_name=event_name,
                 data=data,
                 socket_id=self.pusher_socket_id if ignore else None,
+                provider_class="Pusher"
             )
 
     def get_event_name(self, event_type):
@@ -94,7 +108,8 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         channels = self.get_channels(instance=instance)
         event_name = self.get_event_name(event)
         data = self.get_serializer(self.view, instance=instance).data
-        return channels, event_name, data
+        channels, event_name, data = self.packet_adapter.parse_packet(channels, event_name, data)
+        return channels, event, data
 
 
 class PrivatePusherBackend(PusherBackend):
