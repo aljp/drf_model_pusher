@@ -31,4 +31,7 @@ install:
 
 script:
 - black --check . || true
-- python manage.py test
+- coverage run --source='.' manage.py test
+
+after_success:
+- coverage report
