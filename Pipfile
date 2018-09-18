@@ -12,6 +12,7 @@ pusher = "*"
 pytest = "*"
 pytest-django = "*"
 tox = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.6"

@@ -8,9 +8,15 @@ env:
   global:
     - SECRET_KEY=superSecretKey
   matrix:
-    - DJANGO_VERSION=1.10
-    - DJANGO_VERSION=1.11
-    - DJANGO_VERSION=2.0
+    - DJANGO_VERSION=1.10 DRF_VERSION=3.5
+    - DJANGO_VERSION=1.10 DRF_VERSION=3.6
+    - DJANGO_VERSION=1.10 DRF_VERSION=3.7
+    - DJANGO_VERSION=1.10 DRF_VERSION=3.8
+    - DJANGO_VERSION=1.11 DRF_VERSION=3.5
+    - DJANGO_VERSION=1.11 DRF_VERSION=3.6
+    - DJANGO_VERSION=1.11 DRF_VERSION=3.7
+    - DJANGO_VERSION=1.11 DRF_VERSION=3.8
+    - DJANGO_VERSION=2.0 DRF_VERSION=3.8
 
 matrix:
   allow_failures:
@@ -20,8 +26,12 @@ install:
 - pip install -r requirements.txt
 - yes | pip uninstall Django
 - pip install Django==$DJANGO_VERSION
+- pip install djangorestframework==$DRF_VERSION
 - pip install black==18.6b1 || true
 
 script:
 - black --check . || true
-- python manage.py test
+- coverage run --source='.' manage.py test
+
+after_success:
+- coverage report
