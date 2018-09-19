@@ -13,6 +13,7 @@ pytest = "*"
 pytest-django = "*"
 tox = "*"
 sphinx = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.6"
