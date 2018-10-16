@@ -10,6 +10,7 @@ Welcome to DRF Model Pusher's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   custom_providers
 
 
 Indices and tables
