@@ -32,13 +32,6 @@ class PusherBackendMetaclass(type):
         return final_cls
 
 
-class PacketAdapter(object):
-    """Adapt data from the (event, channels, data) to a potentially different format."""
-
-    def parse_packet(self, channels, event_name, data):
-        return channels, event_name, data
-
-
 class PusherBackend(metaclass=PusherBackendMetaclass):
     """
     PusherBackend is the base class for implementing serializers with Pusher
@@ -47,15 +40,14 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
     class Meta:
         abstract = True
 
-    packet_adapter_class = PacketAdapter
     provider_class = PusherProvider
 
     def __init__(self, view):
         self.view = view
-        self.pusher_socket_id = self.get_pusher_socket(view)
-        self.packet_adapter = PacketAdapter()
+        self.socket_id = self.get_socket_id(view)
+        self.provider = self.provider_class()
 
-    def get_pusher_socket(self, view):
+    def get_socket_id(self, view):
         """Return the socket from the request header."""
         pusher_socket = view.request.META.get("HTTP_X_PUSHER_SOCKET_ID", None)
         return pusher_socket
@@ -70,7 +62,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
                 channels=channels,
                 event_name=event_name,
                 data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
+                socket_id=self.socket_id if ignore else None,
                 provider_class=self.provider_class,
             )
         else:
@@ -80,7 +72,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
                 channels=channels,
                 event_name=event_name,
                 data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
+                socket_id=self.socket_id if ignore else None,
                 provider_class=self.provider_class,
             )
 
@@ -91,13 +83,17 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return "{0}.{1}".format(model_class_name, event_type)
 
     def get_serializer_class(self):
-        """Return the views serializer class"""
+        """Return the serializer class"""
         return self.view.get_serializer_class()
 
-    def get_serializer(self, view, *args, **kwargs):
-        """Return the serializer initialized with the views serializer context"""
+    def get_serializer_context(self):
+        """Return the context for the serializer."""
+        return self.view.get_serializer_context()
+
+    def get_serializer(self, *args, **kwargs):
+        """Return the serializer initialized with the serializer context"""
         serializer_class = self.get_serializer_class()
-        kwargs["context"] = view.get_serializer_context()
+        kwargs["context"] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
 
     def get_channels(self, instance=None):
@@ -109,8 +105,8 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         """Return a tuple consisting of the channel, event name, and the JSON serializable data."""
         channels = self.get_channels(instance=instance)
         event_name = self.get_event_name(event)
-        data = self.get_serializer(self.view, instance=instance).data
-        channels, event_name, data = self.packet_adapter.parse_packet(channels, event_name, data)
+        data = self.get_serializer(instance=instance).data
+        channels, event_name, data = self.provider.parse_packet(self, channels, event_name, data, self.socket_id)
         return channels, event_name, data
 
 
@@ -121,10 +117,10 @@ class PrivatePusherBackend(PusherBackend):
     class Meta:
         abstract = True
 
-    def get_channel(self, instance=None):
+    def get_channels(self, instance=None):
         """Return the channel prefixed with `private-`"""
-        channel = super().get_channel(instance=instance)
-        return "private-{channel}".format(channel=channel)
+        channel = super().get_channels(instance=instance)
+        return ["private-{channel}".format(channel=channel)]
 
 
 def get_models_pusher_backends(model):

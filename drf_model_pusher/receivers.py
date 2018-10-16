@@ -1,16 +1,9 @@
-"""The receiver methods attach to callbacks to signals"""
+"""The receiver methods attach callbacks to signals"""
 from drf_model_pusher.providers import PusherProvider
 
 
 def send_pusher_event(
-    signal,
-    sender,
-    instance,
-    channels,
-    event_name,
-    data,
-    socket_id=None,
-    **kwargs
+    signal, sender, instance, channels, event_name, data, socket_id=None, **kwargs
 ):
     """
     Sends an update using the provided provider class
