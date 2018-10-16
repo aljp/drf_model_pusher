@@ -12,6 +12,7 @@ pusher = "*"
 pytest = "*"
 pytest-django = "*"
 tox = "*"
+sphinx = "*"
 coverage = "*"
 
 [requires]

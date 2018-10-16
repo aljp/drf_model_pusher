@@ -1,3 +1,4 @@
+"""AppConfig for drf_model_pusher"""
 import os
 from importlib import import_module
 
@@ -9,7 +10,9 @@ class DrfModelPusherConfig(AppConfig):
     name = "drf_model_pusher"
 
     def ready(self):
+        """Attach receivers to Signals and import pusher backends."""
         from drf_model_pusher.config import connect_pusher_views
+
         connect_pusher_views()
 
         pusher_backends_file = "pusher_backends.py"
@@ -22,4 +25,3 @@ class DrfModelPusherConfig(AppConfig):
         for app_config in apps.get_app_configs():
             if os.path.exists(os.path.join(app_config.path, pusher_backends_file)):
                 import_module("{0}.pusher_backends".format(app_config.name))
-
