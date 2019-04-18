@@ -18,5 +18,4 @@ def send_pusher_event(
 
     push_provider_class = kwargs.get("provider_class", PusherProvider)
     push_provider = push_provider_class()
-    push_provider.configure()
     push_provider.trigger(channels, event_name, data, socket_id)

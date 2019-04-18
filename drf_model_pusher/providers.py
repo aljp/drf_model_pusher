@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 
 from django.conf import settings
 from pusher import Pusher
@@ -13,9 +14,12 @@ class PusherProvider(object):
         self._disabled = False
 
         if hasattr(settings, "DRF_MODEL_PUSHER_DISABLED"):
-            self._disabled = settings.DRF_MODEL_PUSHER_DISABLED
+            self._disabled = bool(strtobool(settings.DRF_MODEL_PUSHER_DISABLED))
+
+        self.configure()
 
     def configure(self):
+        """Configure the Pusher client"""
         try:
             pusher_cluster = settings.PUSHER_CLUSTER
         except AttributeError:
@@ -29,12 +33,14 @@ class PusherProvider(object):
         )
 
     def trigger(self, channels, event_name, data, socket_id=None):
+        """Send a pusher event"""
         if self._disabled:
             return
 
-        self._pusher.trigger(channels, event_name, data, socket_id)
+        return self._pusher.trigger(channels, event_name, data, socket_id)
 
 
+# TODO: Implement AblyProvider
 class AblyProvider(object):
     def __init__(self, *args, **kwargs):
         pass

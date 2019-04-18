@@ -1,25 +1,21 @@
-from drf_model_pusher.backends import get_models_pusher_backends
+from drf_model_pusher.backends import get_models_pusher_backends, PUSH_UPDATE
 from drf_model_pusher.exceptions import ModelPusherException
-from drf_model_pusher.signals import view_post_save
+from drf_model_pusher.signals import pusher_backend_post_save
 
 
 class ModelPusherViewMixin(object):
     """Enables views to push changes through pusher"""
 
-    pusher_backends = []
-
-    PUSH_CREATE = "create"
-    PUSH_UPDATE = "update"
-    PUSH_DELETE = "delete"
+    pusher_backend_classes = []
 
     def __init__(
-        self, push_creations=True, push_updates=True, push_deletions=True, **kwargs
+        self, *args, push_creations=True, push_updates=True, push_deletions=True, **kwargs
     ):
         self.push_creations = push_creations
         self.push_updates = push_updates
         self.push_deletions = push_deletions
-        super().__init__(**kwargs)
-        self.pusher_backends = self.get_models_pusher_backends()
+        super().__init__(*args, **kwargs)
+        self.pusher_backend_classes = self.get_models_pusher_backends()
 
     def get_models_pusher_backends(self):
         if hasattr(self, "queryset"):
@@ -42,7 +38,7 @@ class ModelPusherViewMixin(object):
 
     def get_pusher_backends(self):
         """Return all the pusher backends registered for this views model"""
-        return [pusher_backend(view=self) for pusher_backend in self.pusher_backends]
+        return [pusher_backend(view=self) for pusher_backend in self.pusher_backend_classes]
 
     def push_changes(self, event=PUSH_UPDATE, instance=None, pre_destroy=False):
         """Triggers the push_change method for all the pusher backends registered on this views model"""
@@ -73,7 +69,7 @@ class ModelPusherViewMixin(object):
         """Dispatch arbitrary data
 
         Intended to be invoked directly for custom purposes"""
-        view_post_save.send(
+        pusher_backend_post_save.send(
             instance=self,
             sender=self.__class__,
             channel=channel,
