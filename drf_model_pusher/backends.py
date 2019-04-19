@@ -142,15 +142,15 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         The default implementation attempts to return the serializer_class
         attribute on the current instance, if that cannot be found then it
         will attempt to return the serializer class from the view.  Otherwise
-        a NotImplementedError is raised."""
+        a ValueError is raised."""
         if self.serializer_class:
             return self.serializer_class
 
         if self.view and hasattr(self.view, "serializer_class"):
             return self.view.serializer_class
 
-        raise NotImplementedError(
-            "{0} cannot find a 'serializer_class' attribute".format(
+        raise ValueError(
+            "{0} cannot find a Serializer class to use".format(
                 self.__class__.__name__
             )
         )
@@ -203,8 +203,8 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         if channels:
             return list(channels)
 
-        raise NotImplementedError(
-            "{0} cannot find a get_pusher_channels() method on the view, serializer, or instance".format(
+        raise ValueError(
+            "{0}.get_channels() did not return any channels".format(
                 self.__class__.__name__
             )
         )
