@@ -16,6 +16,19 @@ PUSH_UPDATE = "update"
 PUSH_DELETE = "delete"
 PUSH_PARTIAL_UPDATE = "partial_update"
 PUSH_SYNC = "sync"
+"""
+These are the default events we have included, and they all mimic rest 
+frameworks default view actions, except for the sync method. 
+
+The update and partial_update events are intended to be implemented differently
+on the client side.  An update event instructs the client to replace any 
+existing object entirely, whilst partial update event instructs clients to only 
+replace the provided attributes.
+
+The sync method is intended to be used to instruct clients to request the 
+object again, this may come in handy if your data may be too large to be sent
+over web sockets.
+"""
 
 
 class PusherBackendMetaclass(type):
@@ -75,7 +88,18 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return False
 
     def push_change(self, event, instance=None, pre_destroy=False, ignore=None):
-        """Send a signal to push the update"""
+        """Push changes for an instance
+
+        A packet is initialised and sent via the 'pusher_backend_post_save()'
+        and 'pusher_backend_pre_destroy()' signals.  A packet is a dictionary
+        containing the channels, event name, and data to be sent.
+
+        A Pusher Socket ID can be included with the signal to prevent this from
+        sending the  update to the current client.  To send the Pusher Socket
+        ID you can set the 'ignore' kwarg to True, or implement
+        'use_pusher_socket()' on the view, or override the
+        'use_pusher_socket()' method on the PusherBackend.
+        """
         packet = self.get_packet(event, instance)
 
         channels = packet.get("channels", None)
@@ -134,9 +158,13 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
     def get_serializer_context(self):
         """Return a dictionary that will be passed to the serializers context
 
-        The default implementation attempts to return the context from the
-        views 'get_serializer_context()' method, if the view has no
-        'get_serializer_context()' method then one is """
+        The serializer context from GenericAPIView.get_serializer_context()
+        returns a dictionary containing the 'view' itself, the 'request', and
+        a 'format' string.  The default implementation attempts to return the
+        context from the view.  When the view does not have a
+        'get_serializer_context()' method, we return a similar dictionary
+        containing any view or request assigned to this PusherBackend instance.
+        """
         context = {}
         if self.view:
             if hasattr(self.view, "get_serializer_context"):
@@ -153,13 +181,15 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return context
 
     def get_serializer(self, *args, **kwargs):
-        """Return the serializer initialized with the views serializer context"""
+        """Return the serializer with the context"""
         serializer_class = self.get_serializer_class()
         kwargs["context"] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
 
     def get_channels(self, instance=None, serializer=None):
-        """Return a list of channels from the view, serializer, and instance"""
+        """Return a list of channels from the view, serializer, and instance
+
+        Channels are combined from the view, serializer, and instances 'get_pusher_channels' method."""
         channels = set()
         if self.view and hasattr(self.view, "get_pusher_channels"):
             channels.update(set(self.view.get_pusher_channels()))
@@ -186,7 +216,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return "{0}.{1}".format(model_class_name, event_type)
 
     def get_packet(self, event, instance):
-        """Return a dictionary containing of the 'channel', 'event_name', and the serializers 'data'"""
+        """Return a dictionary containing the 'channels', 'event_name', and the serializers 'data'"""
         serializer = self.get_serializer(instance=instance)
         channels = self.get_channels(instance=instance, serializer=serializer)
         event_name = self.get_event_name(event)
@@ -200,11 +230,11 @@ class PrivatePusherBackend(PusherBackend):
     class Meta:
         abstract = True
 
-    def get_channel(self, instance=None):
-        """Return the channel prefixed with `private-`"""
+    def get_channels(self, instance=None, serializer=None):
+        """Return the channels prefixed with `private-`"""
         channels = super().get_channels(instance=instance)
         private_channels = list(
-            map(lambda channel: "private-{0}".format(channels), channels)
+            map(lambda channel: "private-{0}".format(channel), channels)
         )
         return private_channels
 

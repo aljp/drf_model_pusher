@@ -9,5 +9,8 @@ class MyModelViewSet(ModelPusherViewMixin, viewsets.ModelViewSet):
     queryset = MyModel.objects.all()
     serializer_class = MyModelSerializer
 
+    def use_pusher_socket(self):
+        return False
+
     def get_pusher_channels(self):
         return ["channel"]

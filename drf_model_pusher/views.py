@@ -1,9 +1,9 @@
-from drf_model_pusher.backends import get_models_pusher_backends, PUSH_UPDATE
+from drf_model_pusher.backends import get_models_pusher_backends, PUSH_UPDATE, PUSH_CREATE, PUSH_DELETE
 from drf_model_pusher.exceptions import ModelPusherException
 from drf_model_pusher.signals import pusher_backend_post_save
 
 
-class ModelPusherViewMixin(object):
+class ModelViewSetPusherMixin(object):
     """Enables views to push changes through pusher"""
 
     pusher_backend_classes = []
@@ -15,9 +15,10 @@ class ModelPusherViewMixin(object):
         self.push_updates = push_updates
         self.push_deletions = push_deletions
         super().__init__(*args, **kwargs)
-        self.pusher_backend_classes = self.get_models_pusher_backends()
+        self.pusher_backend_classes = self.get_models_pusher_backend_classes()
 
-    def get_models_pusher_backends(self):
+    def get_models_pusher_backend_classes(self):
+        """Return PusherBackend classes registered for the views model"""
         if hasattr(self, "queryset"):
             model = self.queryset.model
         elif hasattr(self, "get_queryset"):
@@ -36,6 +37,10 @@ class ModelPusherViewMixin(object):
             )
         )
 
+    def use_pusher_socket(self):
+        """Configure whether the PusherBackend should include the pusher socket id"""
+        return False
+
     def get_pusher_backends(self):
         """Return all the pusher backends registered for this views model"""
         return [pusher_backend(view=self) for pusher_backend in self.pusher_backend_classes]
@@ -49,30 +54,34 @@ class ModelPusherViewMixin(object):
         """Update the object and then send the pusher event"""
         super().perform_update(serializer)
         if self.push_updates:
-            self.push_changes(self.PUSH_UPDATE, serializer.instance)
+            self.push_changes(PUSH_UPDATE, serializer.instance)
 
     def perform_create(self, serializer):
         """Create the object and then send the pusher event"""
         super().perform_create(serializer)
         if self.push_creations:
-            self.push_changes(self.PUSH_CREATE, serializer.instance)
+            self.push_changes(PUSH_CREATE, serializer.instance)
 
     def perform_destroy(self, instance):
         """Sends the pusher event and then destroys the object
 
         This is done to ensure the serialization can occur"""
         if self.push_deletions:
-            self.push_changes(self.PUSH_DELETE, instance, pre_destroy=True)
+            self.push_changes(PUSH_DELETE, instance, pre_destroy=True)
         super().perform_destroy(instance)
 
-    def push(self, channel, event_name, data):
+    def push(self, channels, event_name, data, socket_id=None):
         """Dispatch arbitrary data
 
         Intended to be invoked directly for custom purposes"""
         pusher_backend_post_save.send(
             instance=self,
             sender=self.__class__,
-            channel=channel,
+            channels=channels,
             event_name=event_name,
             data=data,
+            socket_id=socket_id if socket_id else None
         )
+
+
+ModelPusherViewMixin = ModelViewSetPusherMixin
