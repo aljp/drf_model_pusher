@@ -8,13 +8,20 @@ class ModelViewSetPusherMixin(object):
 
     pusher_backend_classes = []
 
+    push_creations = True
+    push_updates = True
+    push_deletions = True
+
     def __init__(
-        self, *args, push_creations=True, push_updates=True, push_deletions=True, **kwargs
+        self, *args, **kwargs
     ):
-        self.push_creations = push_creations
-        self.push_updates = push_updates
-        self.push_deletions = push_deletions
         super().__init__(*args, **kwargs)
+        if kwargs.get("push_creations"):
+            self.push_creations = bool(kwargs.get("push_creations"))
+        if kwargs.get("push_updates"):
+            self.push_updates = bool(kwargs.get("push_updates"))
+        if kwargs.get("push_deletes"):
+            self.push_deletes = bool(kwargs.get("push_deletes"))
         self.pusher_backend_classes = self.get_models_pusher_backend_classes()
 
     def get_models_pusher_backend_classes(self):
@@ -31,11 +38,7 @@ class ModelViewSetPusherMixin(object):
 
     def get_pusher_channels(self):
         """Return the channel from the view"""
-        raise NotImplementedError(
-            "{0} must implement the `get_pusher_channels` method".format(
-                self.__class__.__name__
-            )
-        )
+        return []
 
     def use_pusher_socket(self):
         """Configure whether the PusherBackend should include the pusher socket id"""
