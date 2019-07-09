@@ -3,6 +3,7 @@ from unittest.mock import Mock, call
 
 from pytest import mark
 from rest_framework.test import APIRequestFactory
+from rest_framework.utils.encoders import JSONEncoder
 
 from example.models import MyModel
 from example.serializers import MyModelSerializer
@@ -29,13 +30,13 @@ class TestModelPusherViewMixin(TestCase):
                 call(
                     ["channel"],
                     "mymodel.create",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
                 call(
                     ["private-channel"],
                     "mymodel.create",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
             ]
@@ -63,13 +64,13 @@ class TestModelPusherViewMixin(TestCase):
                 call(
                     ["channel"],
                     "mymodel.create",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     pusher_socket_id,
                 ),
                 call(
                     ["private-channel"],
                     "mymodel.create",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     pusher_socket_id,
                 ),
             ]
@@ -96,13 +97,13 @@ class TestModelPusherViewMixin(TestCase):
                 call(
                     ["channel"],
                     "mymodel.update",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
                 call(
                     ["private-channel"],
                     "mymodel.update",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
             ]
@@ -127,13 +128,13 @@ class TestModelPusherViewMixin(TestCase):
                 call(
                     ["channel"],
                     "mymodel.delete",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
                 call(
                     ["private-channel"],
                     "mymodel.delete",
-                    MyModelSerializer(instance=instance).data,
+                    JSONEncoder().encode(MyModelSerializer(instance=instance).data),
                     None,
                 ),
             ]

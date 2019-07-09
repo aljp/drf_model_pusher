@@ -32,7 +32,7 @@ class ModelViewSetPusherMixin(object):
             model = self.get_queryset().model
         else:
             raise ModelPusherException(
-                "View must have a queryset attribute or get_queryset method defined"
+                "{0} must have a queryset attribute or get_queryset method defined".format(self.__class__.__name__)
             )
         return get_models_pusher_backends(model)
 

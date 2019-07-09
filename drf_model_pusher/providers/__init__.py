@@ -1,0 +1,1 @@
+from drf_model_pusher.providers.pusher import PusherProvider

@@ -3,6 +3,8 @@ PusherBackend classes define how changes from a Model are serialized, and then w
 """
 from collections import defaultdict
 
+from rest_framework.utils.encoders import JSONEncoder
+
 from drf_model_pusher.providers import PusherProvider
 from drf_model_pusher.signals import (
     pusher_backend_post_save,
@@ -64,6 +66,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
 
     provider_class = PusherProvider
     serializer_class = None
+    json_encoder = JSONEncoder
 
     def __init__(self, view=None, request=None):
         self.view = view
@@ -115,26 +118,20 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         if ignore is None:
             ignore = self.use_pusher_socket()
 
+        signal_kwargs = dict(
+            sender=self.__class__,
+            instance=self,
+            channels=channels,
+            event_name=event_name,
+            data=data,
+            socket_id=self.pusher_socket_id if ignore else None,
+            provider_class=self.provider_class,
+        )
+
         if pre_destroy:
-            pusher_backend_pre_destroy.send(
-                sender=self.__class__,
-                instance=self,
-                channels=channels,
-                event_name=event_name,
-                data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
-                provider_class=self.provider_class,
-            )
+            pusher_backend_pre_destroy.send(**signal_kwargs)
         else:
-            pusher_backend_post_save.send(
-                sender=self.__class__,
-                instance=self,
-                channels=channels,
-                event_name=event_name,
-                data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
-                provider_class=self.provider_class,
-            )
+            pusher_backend_post_save.send(**signal_kwargs)
 
     def get_serializer_class(self):
         """Return the views serializer class
@@ -150,9 +147,7 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
             return self.view.serializer_class
 
         raise ValueError(
-            "{0} cannot find a Serializer class to use".format(
-                self.__class__.__name__
-            )
+            "{0} cannot find a Serializer class to use".format(self.__class__.__name__)
         )
 
     def get_serializer_context(self):
@@ -195,10 +190,10 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
             channels.update(set(self.view.get_pusher_channels()))
 
         if serializer and hasattr(serializer, "get_pusher_channels"):
-            channels.update(set(self.view.get_pusher_channels()))
+            channels.update(set(serializer.get_pusher_channels()))
 
         if instance and hasattr(instance, "get_pusher_channels"):
-            channels.update(set(self.view.get_pusher_channels()))
+            channels.update(set(instance.get_pusher_channels()))
 
         if channels:
             return list(channels)
@@ -216,11 +211,17 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
         return "{0}.{1}".format(model_class_name, event_type)
 
     def get_packet(self, event, instance):
-        """Return a dictionary containing the 'channels', 'event_name', and the serializers 'data'"""
+        """Return all the kwargs to be sent with signal
+
+        This implementation returns a dictionary containing the 'channels', 'event_name', and the serializers 'data'"""
         serializer = self.get_serializer(instance=instance)
         channels = self.get_channels(instance=instance, serializer=serializer)
         event_name = self.get_event_name(event)
-        return {"channels": channels, "event_name": event_name, "data": serializer.data}
+        return {
+            "channels": channels,
+            "event_name": event_name,
+            "data": JSONEncoder().encode(serializer.data),
+        }
 
 
 class PrivatePusherBackend(PusherBackend):
