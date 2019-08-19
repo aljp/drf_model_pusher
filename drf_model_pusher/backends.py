@@ -127,6 +127,19 @@ class PrivatePusherBackend(PusherBackend):
         return "private-{channel}".format(channel=channel)
 
 
+class PresencePusherBackend(PusherBackend):
+    """PresencePusherBackend is the base class for implementing serializers
+    with Pusher and prefixing the channel with `presence-`."""
+
+    class Meta:
+        abstract = True
+
+    def get_channel(self, instance=None):
+        """Return the channel prefixed with `presence-`"""
+        channel = super().get_channel(instance=instance)
+        return "presence-{channel}".format(channel=channel)
+
+
 def get_models_pusher_backends(model):
     """Return the pusher backends registered for a model"""
     return pusher_backend_registry.get(model.__name__.lower(), [])
