@@ -3,6 +3,8 @@ PusherBackend classes define how changes from a Model are serialized, and then w
 """
 from collections import defaultdict
 
+from django.conf import settings
+
 from drf_model_pusher.providers import PusherProvider
 from drf_model_pusher.signals import view_pre_destroy, view_post_save
 
@@ -63,26 +65,20 @@ class PusherBackend(metaclass=PusherBackendMetaclass):
     def push_change(self, event, instance=None, pre_destroy=False, ignore=True):
         """Send a signal to push the update"""
         channels, event_name, data = self.get_packet(event, instance)
+        kwargs = dict(
+            sender=self.__class__,
+            instance=self,
+            channels=channels,
+            event_name=event_name,
+            data=data,
+            socket_id=self.pusher_socket_id if ignore else None,
+            provider_class=self.provider_class,
+        )
+
         if pre_destroy:
-            view_pre_destroy.send(
-                sender=self.__class__,
-                instance=self,
-                channels=channels,
-                event_name=event_name,
-                data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
-                provider_class=self.provider_class,
-            )
+            view_pre_destroy.send(**kwargs)
         else:
-            view_post_save.send(
-                sender=self.__class__,
-                instance=self,
-                channels=channels,
-                event_name=event_name,
-                data=data,
-                socket_id=self.pusher_socket_id if ignore else None,
-                provider_class=self.provider_class,
-            )
+            view_post_save.send(**kwargs)
 
     def get_event_name(self, event_type):
         """Return the model name and the event_type separated by a dot"""
@@ -138,6 +134,31 @@ class PresencePusherBackend(PusherBackend):
         """Return the channel prefixed with `presence-`"""
         channel = super().get_channel(instance=instance)
         return "presence-{channel}".format(channel=channel)
+
+    def push_change(self, event, instance=None, pre_destroy=False, ignore=True):
+        if getattr(settings, "DRF_MODEL_PUSHER_OPTIMISE_PRESENCE_EVENTS", False):
+            pusher = self.provider_class()
+            pusher.configure()
+            channels = self.get_channels(instance)
+
+            # For each channel, validate that there is any users in the channel
+            # if there is users in any of the target channels we send the event
+            abort = True
+            for channel in channels:
+                response = pusher._pusher.channel_info(channel, ["user_count"])
+
+                if response["user_count"] > 0:
+                    abort = False
+
+            if abort:
+                return
+
+        return super(PresencePusherBackend, self).push_change(
+            event,
+            instance=instance,
+            pre_destroy=pre_destroy,
+            ignore=ignore
+        )
 
 
 def get_models_pusher_backends(model):

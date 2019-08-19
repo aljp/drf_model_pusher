@@ -1,6 +1,7 @@
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
+from django.test import override_settings
 from pytest import mark
 from rest_framework.test import APIRequestFactory
 
@@ -184,3 +185,37 @@ class TestModelPusherViewMixinPresenceChannels(TestCase):
         trigger.assert_called_once_with(
             ["presence-channel"], "mypresencemodel.delete", MyPresenceModelSerializer(instance=instance).data, None
         )
+
+    @mock.patch("pusher.Pusher.trigger")
+    @mock.patch("pusher.Pusher.channel_info")
+    @override_settings(DRF_MODEL_PUSHER_OPTIMISE_PRESENCE_EVENTS=True)
+    def test_creations_are_pushed_when_optimised_events_are_on(self, channel_info: Mock, trigger: Mock):
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/mymodels/", data={"name": "Henry"})
+
+        channel_info.return_value = {"user_count": 1}
+
+        view = MyPresenceModelViewSet.as_view({"post": "create"})
+        response = view(create_request)
+        instance = MyPresenceModel.objects.last()
+
+        self.assertEqual(response.status_code, 201, response.data)
+
+        trigger.assert_called_once_with(
+            ["presence-channel"], "mypresencemodel.create", MyPresenceModelSerializer(instance=instance).data, None
+        )
+
+    @mock.patch("pusher.Pusher.trigger")
+    @mock.patch("pusher.Pusher.channel_info")
+    @override_settings(DRF_MODEL_PUSHER_OPTIMISE_PRESENCE_EVENTS=True)
+    def test_creations_are_not_pushed_when_optimised_events_are_on(self, channel_info: Mock, trigger: Mock):
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/mymodels/", data={"name": "Henry"})
+
+        channel_info.return_value = {"user_count": 0}
+
+        view = MyPresenceModelViewSet.as_view({"post": "create"})
+        response = view(create_request)
+
+        self.assertEqual(response.status_code, 201, response.data)
+        trigger.assert_not_called()

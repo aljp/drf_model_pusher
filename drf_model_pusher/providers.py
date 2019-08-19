@@ -32,6 +32,9 @@ class PusherProvider(object):
         if self._disabled:
             return
 
+        if self._pusher is None:
+            self.configure()
+
         self._pusher.trigger(channels, event_name, data, socket_id)
 
 

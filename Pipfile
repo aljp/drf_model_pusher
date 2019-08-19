@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 Django = "==2.0"
 djangorestframework = "*"
-pusher = "*"
+pusher = "==2.1.4"
 
 [dev-packages]
 pytest = "*"
