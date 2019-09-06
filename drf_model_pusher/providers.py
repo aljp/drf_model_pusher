@@ -30,7 +30,7 @@ class PusherProvider(object):
 
     def trigger(self, channels, event_name, data, socket_id=None):
         if not isinstance(channels, list):
-            raise TypeError(f"channels must be a list, received {type(channels)}")
+            raise TypeError("channels must be a list, received {0}".format(str(type(channels))))
 
         if self._disabled:
             return
