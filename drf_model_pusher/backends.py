@@ -135,36 +135,6 @@ class PresencePusherBackend(PusherBackend):
         channel = super().get_channel(instance=instance)
         return "presence-{channel}".format(channel=channel)
 
-    def push_change(self, event, instance=None, pre_destroy=False, ignore=True):
-        if not PresencePusherBackend.should_send(channels=self.get_channels(instance)):
-            return
-
-        return super(PresencePusherBackend, self).push_change(
-            event,
-            instance=instance,
-            pre_destroy=pre_destroy,
-            ignore=ignore
-        )
-
-    @classmethod
-    def should_send(cls, channels=list(), ):
-        if getattr(settings, "DRF_MODEL_PUSHER_OPTIMISE_PRESENCE_EVENTS", False):
-            pusher = cls.provider_class()
-            pusher.configure()
-
-            # For each channel, validate that there is any users in the channel
-            # if there is users in any of the target channels we send the event
-            abort = True
-            for channel in channels:
-                response = pusher._pusher.channel_info(channel, ["user_count"])
-
-                if response["user_count"] > 0:
-                    abort = False
-
-            if abort:
-                return False
-        return True
-
 
 def get_models_pusher_backends(model):
     """Return the pusher backends registered for a model"""

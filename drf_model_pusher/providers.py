@@ -38,16 +38,7 @@ class PusherProvider(object):
         if self._pusher is None:
             self.configure()
 
-        # If there are any presence channels, respect the optimisation setting
-        presence_channels = list(filter(lambda c: c.startswith("presence-"), channels))
-        channels = list(filter(lambda c: not c.startswith("presence-"), channels))
-
-        if channels:
-            self._pusher.trigger(channels, event_name, data, socket_id)
-
-        from drf_model_pusher.backends import PresencePusherBackend
-        if presence_channels and PresencePusherBackend.should_send(channels=presence_channels):
-            self._pusher.trigger(presence_channels, event_name, data, socket_id)
+        self._pusher.trigger(channels, event_name, data, socket_id)
 
 
 class AblyProvider(object):

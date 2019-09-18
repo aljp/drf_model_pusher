@@ -93,7 +93,6 @@ The PusherBackend.push_change method accepts an `ignore` boolean keyword argumen
 
 - `DRF_MODEL_PUSHER_BACKENDS_FILE` (default: `pusher_backends.py`) - The file in your applications to import PusherBackends.
 - `DRF_MODEL_PUSHER_DISABLED` (default: `False`) - Determines whether or not to trigger Pusher events.
-- `DRF_MODEL_PUSHER_OPTIMISE_PRESENCE_EVENTS` (default: `False`) - Determines whether or not to trigger Pusher events in [presence channels](https://pusher.com/docs/channels/using_channels/presence-channels) when no users are subscribed.
 
 ## Common Issues
 ### Unregistered Backends
