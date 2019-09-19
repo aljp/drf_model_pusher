@@ -34,14 +34,14 @@ class ChannelExistenceSerializer(PusherWebhookSerializer):
 
     def create(self, validated_data):
         for event in validated_data.get("events", []):
-            # Channel is occupied, add it to the cache
+            cache_key = "drf-model-pusher:occupied:{}".format(event["channel"])
+
+            # Channel is occupied, set it to True
             if event["name"] == "channel_occupied":
-                cache_key = "drf-model-pusher:occupied:{}".format(event["channel"])
                 cache.set(cache_key, True)
 
-            # Channel has been vacated, remove it from the cache
+            # Channel has been vacated, set it to False
             if event["name"] == "channel_vacated":
-                cache_key = "drf-model-pusher:occupied:{}".format(event["channel"])
-                cache.delete(cache_key)
+                cache.set(cache_key, False)
 
         return validated_data

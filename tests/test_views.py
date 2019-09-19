@@ -192,6 +192,8 @@ class TestModelPusherViewMixinPresenceChannels(TestCase):
 @mark.django_db
 class TestChannelExistenceWebhook(TestCase):
     """Test the ChannelExistenceWebhook"""
+    def tearDown(self):
+        cache.clear()
 
     @mock.patch("pusher.Pusher.validate_webhook")
     def test_auth_is_successful(self, validate_webhook: Mock):
@@ -295,7 +297,7 @@ class TestChannelExistenceWebhook(TestCase):
         create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
         response = view(create_request)
 
-        self.assertIsNone(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertFalse(cache.get("drf-model-pusher:occupied:my-channel"))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     @mock.patch("pusher.Pusher.validate_webhook")
@@ -318,5 +320,5 @@ class TestChannelExistenceWebhook(TestCase):
         response = view(create_request)
         validate_webhook.assert_called_once()
 
-        self.assertIsNone(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertFalse(cache.get("drf-model-pusher:occupied:my-channel"))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
