@@ -16,7 +16,7 @@ class PusherWebhookAuthentication(BaseAuthentication):
         validated_data = PusherProvider().client.validate_webhook(
             key=request.META.get("HTTP_X_PUSHER_KEY"),
             signature=request.META.get("HTTP_X_PUSHER_SIGNATURE"),
-            body=request._request.body
+            body=str(request.data)
         )
 
         if validated_data is None:
