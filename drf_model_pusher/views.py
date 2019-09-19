@@ -1,5 +1,9 @@
+from rest_framework.generics import CreateAPIView
+
+from drf_model_pusher.authentication import PusherWebhookAuthentication
 from drf_model_pusher.backends import get_models_pusher_backends
 from drf_model_pusher.exceptions import ModelPusherException
+from drf_model_pusher.serializers import ChannelExistenceSerializer
 from drf_model_pusher.signals import view_post_save
 
 
@@ -80,3 +84,8 @@ class ModelPusherViewMixin(object):
             event_name=event_name,
             data=data,
         )
+
+
+class ChannelExistenceWebhook(CreateAPIView):
+    authentication_classes = [PusherWebhookAuthentication]
+    serializer_class = ChannelExistenceSerializer

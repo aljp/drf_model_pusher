@@ -35,10 +35,14 @@ class PusherProvider(object):
         if self._disabled:
             return
 
+        self.client.trigger(channels, event_name, data, socket_id)
+
+    @property
+    def client(self):
         if self._pusher is None:
             self.configure()
 
-        self._pusher.trigger(channels, event_name, data, socket_id)
+        return self._pusher
 
 
 class AblyProvider(object):

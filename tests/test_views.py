@@ -1,10 +1,10 @@
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
-from django.test import override_settings
 from pytest import mark
 from rest_framework.test import APIRequestFactory
 
+from drf_model_pusher.views import ChannelExistenceWebhook
 from example.models import MyPublicModel, MyPrivateModel, MyPresenceModel
 from example.serializers import MyPublicModelSerializer, MyPrivateModelSerializer, MyPresenceModelSerializer
 from example.views import MyPublicModelViewSet, MyPrivateModelViewSet, MyPresenceModelViewSet
@@ -185,3 +185,28 @@ class TestModelPusherViewMixinPresenceChannels(TestCase):
         trigger.assert_called_once_with(
             ["presence-channel"], "mypresencemodel.delete", MyPresenceModelSerializer(instance=instance).data, None
         )
+
+
+@mark.django_db
+class TestChannelExistenceWebhook(TestCase):
+    """Test the ChannelExistenceWebhook"""
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_auth_is_successful(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_occupied", "channel": "my-channel"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+        validate_webhook.assert_called_once()
