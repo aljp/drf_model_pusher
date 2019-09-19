@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework import serializers
 
 
@@ -32,4 +33,15 @@ class ChannelExistenceSerializer(PusherWebhookSerializer):
     events = ChannelExistenceEventSerializer(many=True)
 
     def create(self, validated_data):
+        for event in validated_data.get("events", []):
+            # Channel is occupied, add it to the cache
+            if event["name"] == "channel_occupied":
+                cache_key = "drf-model-pusher:occupied:{}".format(event["channel"])
+                cache.set(cache_key, True)
+
+            # Channel has been vacated, remove it from the cache
+            if event["name"] == "channel_vacated":
+                cache_key = "drf-model-pusher:occupied:{}".format(event["channel"])
+                cache.delete(cache_key)
+
         return validated_data
