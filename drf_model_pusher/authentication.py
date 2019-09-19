@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request
@@ -16,7 +18,7 @@ class PusherWebhookAuthentication(BaseAuthentication):
         validated_data = PusherProvider().client.validate_webhook(
             key=request.META.get("HTTP_X_PUSHER_KEY"),
             signature=request.META.get("HTTP_X_PUSHER_SIGNATURE"),
-            body=str(request.data)
+            body=json.dumps(request.data, separators=(',', ':'))
         )
 
         if validated_data is None:
