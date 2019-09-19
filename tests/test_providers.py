@@ -15,7 +15,7 @@ class TestPusherProvider(TestCase):
     def test_trigger_calls_pusher_trigger(self, trigger: Mock):
         provider = PusherProvider()
         provider.trigger(["my-channel"], "myevent", {"foo": "bar"})
-        trigger.assert_called_once()
+        self.assertTrue(trigger.called)
 
     @override_settings(DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED=True)
     @mock.patch("pusher.Pusher.trigger")
@@ -24,7 +24,7 @@ class TestPusherProvider(TestCase):
 
         provider = PusherProvider()
         provider.trigger(["my-channel"], "myevent", {"foo": "bar"})
-        trigger.assert_called_once()
+        self.assertTrue(trigger.called)
 
     @override_settings(DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED=True)
     @mock.patch("pusher.Pusher.trigger")
@@ -33,7 +33,7 @@ class TestPusherProvider(TestCase):
 
         provider = PusherProvider()
         provider.trigger(["my-channel"], "myevent", {"foo": "bar"})
-        trigger.assert_not_called()
+        self.assertFalse(trigger.called)
 
     @override_settings(DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED=True)
     @mock.patch("pusher.Pusher.channels_info")
