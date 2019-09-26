@@ -93,6 +93,7 @@ The PusherBackend.push_change method accepts an `ignore` boolean keyword argumen
 
 - `DRF_MODEL_PUSHER_BACKENDS_FILE` (default: `pusher_backends.py`) - The file in your applications to import PusherBackends.
 - `DRF_MODEL_PUSHER_DISABLED` (default: `False`) - Determines whether or not to trigger Pusher events.
+- `DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED` (default: `False`) - Determines whether or not to check if the channel is occupied before sending an event. See [Occupied Channels Optimisation.](#occupied-channels-optimisation)
 
 ## Common Issues
 ### Unregistered Backends
@@ -117,6 +118,23 @@ class MyPusherBackend(PusherBackend):
 class MyModelBackend(MyPusherBackend):
     class Meta:
         model = MyModel
+```
+
+## Occupied Channels Optimisation
+This optimisation store channel occupation state locally through Django's cache and only send events to channels that are occupied. A view class (ChannelExistenceWebhook) is provided to act
+as a webhook to receive updates from Pusher as to whether a channel is still occupied or has been vacated. If the package hasn't seen a channel before it will re-sync the cache with Pusher to make
+sure we have the most up to date view of channel occupations and acts as a warm up for the cache on the first event. Note that [Pusher occasionally delays `channel_vacated` events](https://pusher.com/docs/channels/server_api/webhooks#webhook-request-delay) to
+combat network interruptions.
+
+You can enabled this feature by setting `DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED = True` in your Django settings. You must also have a [Django cache set up](https://docs.djangoproject.com/en/2.2/topics/cache/#setting-up-the-cache) and create a route for [Pusher to send webhook events](https://pusher.com/docs/channels/server_api/webhooks) to:
+
+```python
+# urls.py
+from drf_model_pusher.views import ChannelExistenceWebhook
+
+urlpatterns = [
+    url(r"^pusher/channel-existence/$", ChannelExistenceWebhook.as_view(), name="pusher-channel-existence-webhook"),
+]
 ```
 
 ## Contributions

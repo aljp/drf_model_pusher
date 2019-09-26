@@ -1,10 +1,12 @@
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
-from django.test import override_settings
+from django.core.cache import cache
 from pytest import mark
+from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
+from drf_model_pusher.views import ChannelExistenceWebhook
 from example.models import MyPublicModel, MyPrivateModel, MyPresenceModel
 from example.serializers import MyPublicModelSerializer, MyPrivateModelSerializer, MyPresenceModelSerializer
 from example.views import MyPublicModelViewSet, MyPrivateModelViewSet, MyPresenceModelViewSet
@@ -185,3 +187,139 @@ class TestModelPusherViewMixinPresenceChannels(TestCase):
         trigger.assert_called_once_with(
             ["presence-channel"], "mypresencemodel.delete", MyPresenceModelSerializer(instance=instance).data, None
         )
+
+
+@mark.django_db
+class TestChannelExistenceWebhook(TestCase):
+    """Test the ChannelExistenceWebhook"""
+    def tearDown(self):
+        cache.clear()
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_auth_is_successful(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_occupied", "channel": "my-channel"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+
+        self.assertTrue(validate_webhook.called)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_occupied_channel_stored_in_cache(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_occupied", "channel": "my-channel"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+
+        self.assertTrue(validate_webhook.called)
+        self.assertTrue(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_multiple_occupied_channels_stored_in_cache(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_occupied", "channel": "my-channel-1"},
+                {"name": "channel_occupied", "channel": "my-channel-2"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+
+        self.assertTrue(validate_webhook.called)
+        self.assertTrue(cache.get("drf-model-pusher:occupied:my-channel-1"))
+        self.assertTrue(cache.get("drf-model-pusher:occupied:my-channel-2"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_occupied_channel_vacated_in_cache(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_occupied", "channel": "my-channel"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+
+        self.assertTrue(validate_webhook.called)
+        self.assertTrue(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_vacated", "channel": "my-channel"}
+            ]
+        }
+
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        response = view(create_request)
+
+        self.assertFalse(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    @mock.patch("pusher.Pusher.validate_webhook")
+    def test_vacate_channel_when_not_in_cache(self, validate_webhook: Mock):
+        data = {
+            "time_ms": 123456789,
+            "events": [
+                {"name": "channel_vacated", "channel": "my-channel"}
+            ]
+        }
+
+        headers = dict(
+            HTTP_X_PUSHER_KEY="123456789",
+            HTTP_X_PUSHER_SIGNATURE="123456789"
+        )
+
+        request_factory = APIRequestFactory()
+        create_request = request_factory.post(path="/pusher/channel-existence/", data=data, **headers)
+        view = ChannelExistenceWebhook().as_view()
+        response = view(create_request)
+
+        self.assertTrue(validate_webhook.called)
+        self.assertFalse(cache.get("drf-model-pusher:occupied:my-channel"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

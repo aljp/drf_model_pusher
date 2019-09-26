@@ -1,5 +1,6 @@
 
 from django.conf import settings
+from django.core.cache import cache
 from pusher import Pusher
 
 
@@ -35,10 +36,45 @@ class PusherProvider(object):
         if self._disabled:
             return
 
+        valid_channels = channels
+
+        # Only send events to channels that are occupied
+        if getattr(settings, "DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED", False):
+            valid_channels = []
+            for channel in channels:
+                cache_key = "drf-model-pusher:occupied:{}".format(channel)
+                occupied = cache.get(cache_key)
+
+                if occupied is None:
+                    self._sync_cache()
+                    occupied = cache.get(cache_key)
+
+                if occupied is False:
+                    continue
+
+                if occupied is True:
+                    valid_channels.append(channel)
+
+        if valid_channels:
+            self.client.trigger(valid_channels, event_name, data, socket_id)
+
+    @property
+    def client(self) -> Pusher:
         if self._pusher is None:
             self.configure()
 
-        self._pusher.trigger(channels, event_name, data, socket_id)
+        return self._pusher
+
+    def _sync_cache(self):
+        """
+        Fetches channel existence state from Pusher and stores the results in the cache
+        :return:
+        """
+        response = self.client.channels_info()
+        occupied_channels = response.get("channels", {}).keys()
+
+        for channel in occupied_channels:
+            cache.set("drf-model-pusher:occupied:{}".format(channel), True)
 
 
 class AblyProvider(object):
