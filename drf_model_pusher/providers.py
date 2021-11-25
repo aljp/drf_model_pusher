@@ -74,12 +74,7 @@ class PusherProvider(object):
         occupied_channels = response.get("channels", {}).keys()
 
         cache.set_many(
-            list(
-                map(
-                    lambda occupied_channel: {"drf-model-pusher:occupied:{}".format(occupied_channel): True},
-                    occupied_channels
-                )
-            )
+            dict.fromkeys(occupied_channels, True)
         )
 
 
