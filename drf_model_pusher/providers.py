@@ -73,8 +73,14 @@ class PusherProvider(object):
         response = self.client.channels_info()
         occupied_channels = response.get("channels", {}).keys()
 
-        for channel in occupied_channels:
-            cache.set("drf-model-pusher:occupied:{}".format(channel), True)
+        cache.set_many(
+            list(
+                map(
+                    lambda occupied_channel: {"drf-model-pusher:occupied:{}".format(occupied_channel): True},
+                    occupied_channels
+                )
+            )
+        )
 
 
 class AblyProvider(object):
