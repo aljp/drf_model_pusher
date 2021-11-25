@@ -71,8 +71,12 @@ class PusherProvider(object):
         :return:
         """
         response = self.client.channels_info()
-        occupied_channels = response.get("channels", {}).keys()
-
+        occupied_channels = list(
+            map(
+                lambda occupied_channel: "drf-model-pusher:occupied:{}".format(occupied_channel),
+                response.get("channels", {}).keys()
+            )
+        )
         cache.set_many(
             dict.fromkeys(occupied_channels, True)
         )
