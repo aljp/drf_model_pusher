@@ -41,18 +41,17 @@ class PusherProvider(object):
         # Only send events to channels that are occupied
         if getattr(settings, "DRF_MODEL_PUSHER_WEBHOOK_OPTIMISATION_ENABLED", False):
             valid_channels = []
+            has_synced_cache = False
             for channel in channels:
                 cache_key = "drf-model-pusher:occupied:{}".format(channel)
                 occupied = cache.get(cache_key)
 
-                if occupied is None:
+                if occupied is None and not has_synced_cache:
                     self._sync_cache()
+                    has_synced_cache = True
                     occupied = cache.get(cache_key)
 
-                if occupied is False:
-                    continue
-
-                if occupied is True:
+                if occupied:
                     valid_channels.append(channel)
 
         if valid_channels:
