@@ -3,7 +3,7 @@
 
 # DRF Model Pusher
 
-Easy to use class mixins for [Django Rest Framework]() and [Pusher]() to keep your API realtime.
+Easy to use class mixins for [Django Rest Framework](https://www.django-rest-framework.org/) and [Pusher](https://pusher.com/) to keep your API realtime.
 
 ## Installation
 
